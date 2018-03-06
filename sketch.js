@@ -24,7 +24,7 @@ function setup() {
     world = engine.world;
     world.gravity.scale = 0;
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 2; i++) {
         orbs[i] = new planetoid();
     }
 
