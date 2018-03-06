@@ -3,6 +3,10 @@ const Bodies = Matter.Bodies;
 const World = Matter.World;
 const Vector = Matter.Vector;
 
+Matter.use(
+    'matter-attractors' // PLUGIN_NAME
+  );
+
 let engine;
 let world;
 
@@ -10,29 +14,33 @@ let world;
 let g = 3;
 let orbs = [];
 let box = [];
+let sats = [];
+let satCount = 0;
 
 function setup() {
-    createCanvas(600, 600);
+    createCanvas(800, 800);
 
     engine = Engine.create();
     world = engine.world;
+    world.gravity.scale = 0;
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 1; i++) {
         orbs[i] = new planetoid();
     }
 
-    box[0] = new block();
-    
-    engine.world.gravity.y = 0;
-
+    for (let i = 0; i <200; i++) {
+        box[i] = new block();
+    }
    
+
     // World.add(world, ground);
 }
 
 function draw(){
     background(0);
 
-    Engine.run(engine);
+    // Engine.run(engine);
+    Engine.update(engine, 1000 / 30)
 
     // for (let i = 0; i < orbs.length; i++){
 
@@ -47,21 +55,28 @@ function draw(){
     //     box[0].resolveForces({x: 200, y: 200}, {x: 0.5, y: 0.5});//gForce);
     // }
 
+    for (let q of sats) {
+            q.satAim();
+            q.satShow();
+    }
+
     for (let q of orbs){
         q.render();
     }
 
-    box[0].render();
+    for (let q of box) {
+        q.render();
+    }
 
 }
 
-// let sats = [];
+
 // let tail = [
 //   []
 // ];
 // let crashes = [];
 // let jet = [];
-// let satCount = 0;
+
 
 // function setup() {
 
@@ -141,10 +156,10 @@ function draw(){
 
 // }
 
-// function mousePressed() {
-//   sats.push(new satellite(satCount++));
-// }
+function mousePressed() {
+  sats.push(new satellite(satCount++));
+}
 
-// function mouseReleased() {
-//   sats[sats.length - 1].satLaunch();
-// }
+function mouseReleased() {
+  sats[sats.length - 1].satLaunch();
+}

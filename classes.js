@@ -10,10 +10,22 @@ class planetoid {
     this.col[2] = 255 - this.col[0];
 
     let params = {
-      isStatic: true
-    }
+      isStatic: true,
+      friction: 0.01,
+      mass:200,
+      plugin: {
+        attractors: [
+          function(bodyA, bodyB) {
+            return {
+              x: (bodyA.position.x - bodyB.position.x) * 1e-6,
+              y: (bodyA.position.y - bodyB.position.y) * 1e-6,
+            };
+          }
+        ]
+      }
+    };
 
-    this.body = Bodies.circle(this.x, this.y, this.mass, params);
+    this.body = Bodies.circle(this.x, this.y, this.mass / 2, params);
     World.add(engine.world, this.body);
 
     console.log(this.body);
@@ -58,29 +70,36 @@ class planetoid {
 class satellite {
   constructor(_count) {
     this.pos = createVector(mouseX, mouseY);
-    this.vel = createVector(0, 0);
-    this.accel = createVector(0, 0);
+    // this.vel = createVector(0, 0);
+    // this.accel = createVector(0, 0);
     this.letgo = false;
-    this.lim = 8;
-    this.trailX = [];
-    this.trailY = [];
+    this.lim = 25;
+    // this.trailX = [];
+    // this.trailY = [];
     this.index = _count;
 
-    tail.push([]);
+    // tail.push([]);
+
   }
 
   satAim() {
     if (!this.letgo) {
-      let heading = createVector(this.pos.x, this.pos.y);
-      let mousePos = createVector(mouseX, mouseY);
 
-      heading.sub(mousePos);
+      let heading = Vector.create(this.pos.x, this.pos.y);
+      let mousePos = Vector.create(mouseX, mouseY);
+
+      heading = Vector.sub(heading, mousePos);
       stroke(255);
       strokeWeight(2);
-      heading.limit(this.lim * 5);
+      // heading.limit(this.lim * 5);
+      if (Vector.magnitudeSquared(heading) > this.lim * this.lim){
+        heading = Vector.normalise(heading);
+        heading = Vector.mult(heading, this.lim);
+      }
+
       line(this.pos.x, this.pos.y, this.pos.x - heading.x, this.pos.y - heading.y);
 
-      heading.limit(this.lim);
+      // heading.limit(this.lim);
       noStroke();
       fill(255);
       push();
@@ -88,49 +107,65 @@ class satellite {
       this.ship(heading.x, heading.y);
       // ellipse(0, 0, 30, 10);
 
-      heading.mult(0.2);
-      this.accel = heading.copy();
+      heading = Vector.mult(heading, 0.2);
+      this.vel = Vector.clone(heading);
       pop();
+      
     }
   }
 
   satLaunch() {
-    this.vel.add(this.accel);
-    this.letgo = true;
-    this.accel = createVector(0, 0);
-    this.trailX[0] = this.pos.x;
-    this.trailY[0] = this.pos.y;
-  }
-
-  velUpdate(_x, _y, _mass) {
-    if (this.letgo) {
-      let gDir = createVector(_x, _y);
-      gDir.sub(this.pos);
-      let gMag = (g * _mass) / gDir.magSq();
-      gDir.setMag(gMag);
-
-      this.vel.add(gDir);
+    let thrust = Vector.create((this.pos.x - mouseX) * 1e-7, (this.pos.y - mouseY) * 1e-7);
+    
+    let params = {
+      mass: 1,
+      force: {x: thrust.x, y: thrust.y}
     }
-    this.vel.limit(this.lim);
 
+    this.body = Bodies.circle(this.pos.x, this.pos.y, 3, params);
+    World.add(engine.world, this.body);
+
+
+    
+    // thrust = Vector.div(thrust, this.body.mass);    
+
+    // this.vel.add(this.accel);
+    this.letgo = true;
+    // this.accel = createVector(0, 0);
+    // this.trailX[0] = this.pos.x;
+    // this.trailY[0] = this.pos.y;
   }
+
+  // velUpdate(_x, _y, _mass) {
+  //   if (this.letgo) {
+  //     let gDir = createVector(_x, _y);
+  //     gDir.sub(this.pos);
+  //     let gMag = (g * _mass) / gDir.magSq();
+  //     gDir.setMag(gMag);
+
+  //     this.vel.add(gDir);
+  //   }
+  //   this.vel.limit(this.lim);
+  // }
 
   satShow() {
     if (this.letgo) {
-      let heading = createVector(this.pos.x, this.pos.y);
-      this.pos.add(this.vel);
+      let pos = this.body.position;
+      let vel = this.body.velocity;
 
-      tail[this.index].push(new trail(this.pos.x, this.pos.y));
+      let heading = Vector.clone(pos.x, pos.y);
+      pos = Vector.add(pos, vel);
 
-      heading.sub(this.pos);
+      // tail[this.index].push(new trail(this.pos.x, this.pos.y));
+
+      heading = Vector.sub(heading, pos);
       fill(255);
       push();
       noStroke();
-      translate(this.pos.x, this.pos.y);
+      translate(pos.x, pos.y);
       rotate(PI);
       this.ship(heading.x, heading.y);
       pop();
-
     }
   }
 
@@ -154,13 +189,16 @@ class satellite {
 
 class block {
   constructor() {
-      this.size = 10;
-
+      this.size = random(5, 20);
+      let maxForce = 0.05;
+     
       let params = {
-          friction: 0.1
-      };
+          friction: 0.1,
+          mass: 1,
+          force: {x: random(-maxForce, maxForce), y: random(-maxForce, maxForce)} 
+        };
 
-      this.body = Bodies.rectangle(width / 2, height / 4, this.size, this.size, params);
+      this.body = Bodies.rectangle(random(width), random(height), this.size, this.size, params);
       World.add(engine.world, this.body);
 
       console.log(this.body);
