@@ -8,21 +8,34 @@ class planetoid {
     this.col = [random(0, 255)];
     this.col[1] = random(0, 255);
     this.col[2] = 255 - this.col[0];
+
+    let params = {
+      isStatic: true
+    }
+
+    this.body = Bodies.circle(this.x, this.y, this.mass, params);
+    World.add(engine.world, this.body);
+
+    console.log(this.body);
   }
 
   render() {
     let max = 24;
+    let pos = this.body.position;
+    
+    push();
+    translate(pos.x, pos.y);
     noStroke();
     fill(255);
-    ellipse(this.x, this.y, this.mass, this.mass);
+    ellipse(0, 0, this.mass, this.mass);
 
     blendMode(SCREEN);
     fill(this.col[0], this.col[1], this.col[2], 255 - 255 / max * this.counter[0]);
-    ellipse(this.x, this.y, this.mass + this.counter[0], this.mass + this.counter[0]);
+    ellipse(0, 0, this.mass + this.counter[0], this.mass + this.counter[0]);
     fill(this.col[0], this.col[1], this.col[2], 255 - 255 / max * this.counter[1]);
-    ellipse(this.x, this.y, this.mass + this.counter[1], this.mass + this.counter[1]);
+    ellipse(0, 0, this.mass + this.counter[1], this.mass + this.counter[1]);
     fill(this.col[0], this.col[1], this.col[2], 255 - 255 / max * this.counter[2]);
-    ellipse(this.x, this.y, this.mass + this.counter[2], this.mass + this.counter[2]);
+    ellipse(0, 0, this.mass + this.counter[2], this.mass + this.counter[2]);
 
     this.counter[0] += 0.1;
     this.counter[1] += 0.1;
@@ -38,6 +51,7 @@ class planetoid {
       this.counter[2] = 0;
     }
     blendMode(BLEND);
+    pop();
   }
 }
 
@@ -136,98 +150,142 @@ class satellite {
   }
 }
 
-class trail {
-  constructor(_x, _y) {
-    this.x = _x;
-    this.y = _y;
+
+
+class block {
+  constructor() {
+      this.size = 10;
+
+      let params = {
+          friction: 0.1
+      };
+
+      this.body = Bodies.rectangle(width / 2, height / 4, this.size, this.size, params);
+      World.add(engine.world, this.body);
+
+      console.log(this.body);
   }
 
-  trailShow() {
-    stroke(255);
-    strokeWeight(0.5);
-    noFill();
-    // point(this.x, this.y);
-    ellipse(this.x, this.y, 2, 2);
-  }
-}
+  resolveForces(_p, _f){
 
-class crashSite {
-  constructor(_x, _y, _x2, _y2) {
-    this.pos = createVector(_x, _y);
-    this.pos2 = createVector(_x2, _y2);
-
-    this.vel = this.pos.copy();
-    this.vel.sub(this.pos2.x, this.pos2.y);
-    this.vel.setMag(random(2, 4));
-    this.vel.rotate(random(-PI / 6, PI / 6));
-
-    this.acc = this.pos.copy();
-    this.acc.sub(this.pos2.x, this.pos2.y);
-    this.acc.setMag(-0.1);
-
-    // this.up = this.pos.copy();
-    // this.up.sub(this.pos2.x, this.pos2.y);
-    // this.dn = this.pos.copy();
-    // this.dn.setMag(0.2);
-    // this.up.setMag(random(2, 4));
-    // this.up.rotate(random(-PI / 6, PI / 6));
-    this.rad = random(5, 20);
-
-    this.col = [255, random(150, 250), 0];
+    // Matter.Body.applyForce(this.body, _p, _f);
+    this.body.force.x += force.x;
+    this.body.force.y += force.y;
+    var offset = { x: _p.x - this.body.position.x, y: _p.y - this.body.position.y };
+    this.body.torque += offset.x * _f.y - offset.y * _f.x;
   }
 
-  crashUpdate() {
-    this.acc = this.pos.copy();
-    this.acc.sub(this.pos2.x, this.pos2.y);
-    this.acc.setMag(-0.1);
+  render(){
+      let pos = this.body.position;
+      let ang = this.body.angle;
 
-    this.vel.add(this.acc);
-    this.pos.add(this.vel);
-
-    // this.dn = this.pos.copy();
-    // this.dn.setMag(0.2);
-    // this.up.sub(this.dn);
-    // this.pos.add(this.up);
-  }
-
-  crashShow() {
-    noStroke();
-    fill(this.col[0], this.col[1], this.col[2]);
-    if (this.rad > 0) {
-      ellipse(this.pos.x, this.pos.y, this.rad, this.rad);
-    }
-    this.rad -= 0.5;
+      push();
+      translate(pos.x, pos.y);
+      rotate(ang);
+      stroke(200 );
+      strokeWeight(2);
+      fill(200, 127);
+      rectMode(CENTER);
+      rect(0, 0, this.size, this.size);
+      pop();
   }
 }
 
-class stream {
-  constructor(_x, _y, _x2, _y2) {
-    this.pos = createVector(_x, _y);
 
-    this.away = createVector(0, 0);
-    this.away.sub(_x2, _y2);
 
-    let exhaust = this.away.copy();
-    exhaust.setMag(7);
-    this.pos.add(exhaust);
-    this.away.rotate(random(-PI / 10, PI / 10));
 
-    this.col = [255, random(100, 125), 0, 255];
-    this.rad = random(5, 10);
-  }
+// class trail {
+//   constructor(_x, _y) {
+//     this.x = _x;
+//     this.y = _y;
+//   }
 
-  streamUpdate() {
-    this.pos.add(this.away);
-  }
+//   trailShow() {
+//     stroke(255);
+//     strokeWeight(0.5);
+//     noFill();
+//     // point(this.x, this.y);
+//     ellipse(this.x, this.y, 2, 2);
+//   }
+// }
 
-  streamShow() {
-    noStroke();
-    fill(this.col[0], this.col[1], this.col[2], this.col[3]);
-    if (this.rad > 0) {
-      ellipse(this.pos.x, this.pos.y, this.rad, this.rad);
-    }
-    this.rad -= 0.2;
-    this.col[1] -= 10;
-    this.col[3] -= 5;
-  }
-}
+// class crashSite {
+//   constructor(_x, _y, _x2, _y2) {
+//     this.pos = createVector(_x, _y);
+//     this.pos2 = createVector(_x2, _y2);
+
+//     this.vel = this.pos.copy();
+//     this.vel.sub(this.pos2.x, this.pos2.y);
+//     this.vel.setMag(random(2, 4));
+//     this.vel.rotate(random(-PI / 6, PI / 6));
+
+//     this.acc = this.pos.copy();
+//     this.acc.sub(this.pos2.x, this.pos2.y);
+//     this.acc.setMag(-0.1);
+
+//     // this.up = this.pos.copy();
+//     // this.up.sub(this.pos2.x, this.pos2.y);
+//     // this.dn = this.pos.copy();
+//     // this.dn.setMag(0.2);
+//     // this.up.setMag(random(2, 4));
+//     // this.up.rotate(random(-PI / 6, PI / 6));
+//     this.rad = random(5, 20);
+
+//     this.col = [255, random(150, 250), 0];
+//   }
+
+//   crashUpdate() {
+//     this.acc = this.pos.copy();
+//     this.acc.sub(this.pos2.x, this.pos2.y);
+//     this.acc.setMag(-0.1);
+
+//     this.vel.add(this.acc);
+//     this.pos.add(this.vel);
+
+//     // this.dn = this.pos.copy();
+//     // this.dn.setMag(0.2);
+//     // this.up.sub(this.dn);
+//     // this.pos.add(this.up);
+//   }
+
+//   crashShow() {
+//     noStroke();
+//     fill(this.col[0], this.col[1], this.col[2]);
+//     if (this.rad > 0) {
+//       ellipse(this.pos.x, this.pos.y, this.rad, this.rad);
+//     }
+//     this.rad -= 0.5;
+//   }
+// }
+
+// class stream {
+//   constructor(_x, _y, _x2, _y2) {
+//     this.pos = createVector(_x, _y);
+
+//     this.away = createVector(0, 0);
+//     this.away.sub(_x2, _y2);
+
+//     let exhaust = this.away.copy();
+//     exhaust.setMag(7);
+//     this.pos.add(exhaust);
+//     this.away.rotate(random(-PI / 10, PI / 10));
+
+//     this.col = [255, random(100, 125), 0, 255];
+//     this.rad = random(5, 10);
+//   }
+
+//   streamUpdate() {
+//     this.pos.add(this.away);
+//   }
+
+//   streamShow() {
+//     noStroke();
+//     fill(this.col[0], this.col[1], this.col[2], this.col[3]);
+//     if (this.rad > 0) {
+//       ellipse(this.pos.x, this.pos.y, this.rad, this.rad);
+//     }
+//     this.rad -= 0.2;
+//     this.col[1] -= 10;
+//     this.col[3] -= 5;
+//   }
+// }
