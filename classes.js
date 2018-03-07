@@ -12,15 +12,15 @@ class planetoid {
     let params = {
       isStatic: true,
       friction: 0.01,
-      mass:200,
+      mass: 2000,
       plugin: {
-        attractors: [
-          function(bodyA, bodyB) {
-            return {
-              x: (bodyA.position.x - bodyB.position.x) * 1e-6,
-              y: (bodyA.position.y - bodyB.position.y) * 1e-6,
-            };
-          }
+        attractors: [MatterAttractors.Attractors.gravity
+          // function(bodyA, bodyB) {
+          //   return {
+          //     // x: (bodyA.position.x - bodyB.position.x) * 1e-6,
+          //     // y: (bodyA.position.y - bodyB.position.y) * 1e-6,
+          //   };
+          // }
         ]
       }
     };
@@ -34,7 +34,7 @@ class planetoid {
   render() {
     let max = 24;
     let pos = this.body.position;
-    
+
     push();
     translate(pos.x, pos.y);
     noStroke();
@@ -92,7 +92,7 @@ class satellite {
       stroke(255);
       strokeWeight(2);
       // heading.limit(this.lim * 5);
-      if (Vector.magnitudeSquared(heading) > this.lim * this.lim){
+      if (Vector.magnitudeSquared(heading) > this.lim * this.lim) {
         heading = Vector.normalise(heading);
         heading = Vector.mult(heading, this.lim);
       }
@@ -110,24 +110,27 @@ class satellite {
       heading = Vector.mult(heading, 0.2);
       this.vel = Vector.clone(heading);
       pop();
-      
+
     }
   }
 
   satLaunch() {
     let thrust = Vector.create((this.pos.x - mouseX) * 1e-7, (this.pos.y - mouseY) * 1e-7);
-    
+
     let params = {
       mass: 1,
-      force: {x: thrust.x, y: thrust.y}
+      force: {
+        x: thrust.x,
+        y: thrust.y
+      }
     }
 
     this.body = Bodies.circle(this.pos.x, this.pos.y, 3, params);
     World.add(engine.world, this.body);
 
 
-    
-    // thrust = Vector.div(thrust, this.body.mass);    
+
+    // thrust = Vector.div(thrust, this.body.mass);
 
     // this.vel.add(this.accel);
     this.letgo = true;
@@ -189,43 +192,49 @@ class satellite {
 
 class block {
   constructor() {
-      this.size = random(5, 20);
-      let maxForce = 0.05;
-     
-      let params = {
-          friction: 0.1,
-          mass: 1,
-          force: {x: random(-maxForce, maxForce), y: random(-maxForce, maxForce)} 
-        };
+    this.size = random(5, 20);
+    let maxForce = 0.005;
 
-      this.body = Bodies.rectangle(random(width), random(height), this.size, this.size, params);
-      World.add(engine.world, this.body);
+    let params = {
+      friction: 0.1,
+      mass: 1,
+      force: {
+        x: random(-maxForce, maxForce),
+        y: random(-maxForce, maxForce)
+      }
+    };
 
-      console.log(this.body);
+    this.body = Bodies.rectangle(random(width), random(height), this.size, this.size, params);
+    World.add(engine.world, this.body);
+
+    console.log(this.body);
   }
 
-  resolveForces(_p, _f){
+  resolveForces(_p, _f) {
 
     // Matter.Body.applyForce(this.body, _p, _f);
     this.body.force.x += force.x;
     this.body.force.y += force.y;
-    var offset = { x: _p.x - this.body.position.x, y: _p.y - this.body.position.y };
+    var offset = {
+      x: _p.x - this.body.position.x,
+      y: _p.y - this.body.position.y
+    };
     this.body.torque += offset.x * _f.y - offset.y * _f.x;
   }
 
-  render(){
-      let pos = this.body.position;
-      let ang = this.body.angle;
+  render() {
+    let pos = this.body.position;
+    let ang = this.body.angle;
 
-      push();
-      translate(pos.x, pos.y);
-      rotate(ang);
-      stroke(200 );
-      strokeWeight(2);
-      fill(200, 127);
-      rectMode(CENTER);
-      rect(0, 0, this.size, this.size);
-      pop();
+    push();
+    translate(pos.x, pos.y);
+    rotate(ang);
+    stroke(200);
+    strokeWeight(2);
+    fill(200, 127);
+    rectMode(CENTER);
+    rect(0, 0, this.size, this.size);
+    pop();
   }
 }
 

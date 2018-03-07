@@ -4,8 +4,8 @@ const World = Matter.World;
 const Vector = Matter.Vector;
 
 Matter.use(
-    'matter-attractors' // PLUGIN_NAME
-  );
+  'matter-attractors' // PLUGIN_NAME
+);
 
 let engine;
 let world;
@@ -18,55 +18,55 @@ let sats = [];
 let satCount = 0;
 
 function setup() {
-    createCanvas(800, 800);
+  createCanvas(800, 800);
 
-    engine = Engine.create();
-    world = engine.world;
-    world.gravity.scale = 0;
+  engine = Engine.create();
+  world = engine.world;
+  world.gravity.scale = 0;
 
-    for (let i = 0; i < 1; i++) {
-        orbs[i] = new planetoid();
-    }
+  for (let i = 0; i < 1; i++) {
+    orbs[i] = new planetoid();
+  }
 
-    for (let i = 0; i <200; i++) {
-        box[i] = new block();
-    }
-   
+  for (let i = 0; i < 100; i++) {
+    box[i] = new block();
+  }
 
-    // World.add(world, ground);
+
+  // World.add(world, ground);
 }
 
-function draw(){
-    background(0);
+function draw() {
+  background(0);
 
-    // Engine.run(engine);
-    Engine.update(engine, 1000 / 30)
+  // Engine.run(engine);
+  Engine.update(engine, 60);
 
-    // for (let i = 0; i < orbs.length; i++){
+  // for (let i = 0; i < orbs.length; i++){
 
-    //     // let dSquared = Vector.create(box[0].body.position.x - orbs[i].body.position.x, 
-    //     //     box[0].body.position.y - orbs[i].body.position.y);
+  //     // let dSquared = Vector.create(box[0].body.position.x - orbs[i].body.position.x,
+  //     //     box[0].body.position.y - orbs[i].body.position.y);
 
-    //     // let gStrength = g * orbs[i].mass / dSquared.magnitudeSquared;
-        
-    //     // dSquared = Vector.normalise(dSquared);
-    //     // let gForce = Vector.mult(dSquared, gStrength);
+  //     // let gStrength = g * orbs[i].mass / dSquared.magnitudeSquared;
 
-    //     box[0].resolveForces({x: 200, y: 200}, {x: 0.5, y: 0.5});//gForce);
-    // }
+  //     // dSquared = Vector.normalise(dSquared);
+  //     // let gForce = Vector.mult(dSquared, gStrength);
 
-    for (let q of sats) {
-            q.satAim();
-            q.satShow();
-    }
+  //     box[0].resolveForces({x: 200, y: 200}, {x: 0.5, y: 0.5});//gForce);
+  // }
 
-    for (let q of orbs){
-        q.render();
-    }
+  for (let q of sats) {
+    q.satAim();
+    q.satShow();
+  }
 
-    for (let q of box) {
-        q.render();
-    }
+  for (let q of orbs) {
+    q.render();
+  }
+
+  for (let q of box) {
+    q.render();
+  }
 
 }
 
