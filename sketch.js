@@ -24,9 +24,15 @@ function setup() {
   world = engine.world;
   world.gravity.scale = 0;
 
+<<<<<<< HEAD
   for (let i = 0; i < 1; i++) {
     orbs[i] = new planetoid();
   }
+=======
+    for (let i = 0; i < 2; i++) {
+        orbs[i] = new planetoid();
+    }
+>>>>>>> 0c43ea8d85cd1c8c4bc5ef8398f6f6ae60a74d31
 
   for (let i = 0; i < 100; i++) {
     box[i] = new block();
